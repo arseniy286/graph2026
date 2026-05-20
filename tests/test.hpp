@@ -31,7 +31,7 @@ void TestWeightedGraph();
 void TestWeightedOrientedGraph();
 
 /* Сюда нужно добавить объявления тестовых функций. */
-
+void TestFindBridges();
 
 
 /* Конец вставки. */
