@@ -24,4 +24,4 @@ int FindBridgesMethod(const nlohmann::json& input, nlohmann::json* output) {
   return 0;
 }
 
-}
+}  // namespace graph
