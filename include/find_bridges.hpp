@@ -2,29 +2,33 @@
 #define INCLUDE_FIND_BRIDGES_HPP_
 
 #include <algorithm>
+#include <unordered_map>
+#include <unordered_set>
 #include <utility>
 #include <vector>
+
+namespace graph {
 
 template <typename Graph>
 class FindBridgesAlgorithm {
  private:
-  int timer;
-  std::vector<bool> used;
-  std::vector<int> tin;
-  std::vector<int> fup;
-  std::vector<std::pair<int, int>> bridges;
+  size_t timer;
+  std::unordered_set<size_t> used;
+  std::unordered_map<size_t, size_t> tin;
+  std::unordered_map<size_t, size_t> fup;
+  std::vector<std::pair<size_t, size_t>> bridges;
 
-  void Dfs(int v, int p, const Graph& graph) {
-    used[v] = true;
+  void Dfs(size_t v, size_t p, bool has_parent, const Graph& graph) {
+    used.insert(v);
     tin[v] = fup[v] = timer++;
-    for (int to : graph[v]) {
-      if (to == p) {
+    for (size_t to : graph.IncomingEdges(v)) {
+      if (has_parent && to == p) {
         continue;
       }
-      if (used[to]) {
+      if (used.find(to) != used.end()) {
         fup[v] = std::min(fup[v], tin[to]);
       } else {
-        Dfs(to, v, graph);
+        Dfs(to, v, true, graph);
         fup[v] = std::min(fup[v], fup[to]);
         if (fup[to] > tin[v]) {
           bridges.push_back({std::min(v, to), std::max(v, to)});
@@ -34,21 +38,22 @@ class FindBridgesAlgorithm {
   }
 
  public:
-  std::vector<std::pair<int, int>> FindBridges(const Graph& graph) {
-    int n = graph.size();
+  std::vector<std::pair<size_t, size_t>> FindBridges(const Graph& graph) {
     timer = 0;
-    used.assign(n, false);
-    tin.assign(n, -1);
-    fup.assign(n, -1);
+    used.clear();
+    tin.clear();
+    fup.clear();
     bridges.clear();
 
-    for (int i = 0; i < n; ++i) {
-      if (!used[i]) {
-        Dfs(i, -1, graph);
+    for (size_t i : graph.Vertices()) {
+      if (used.find(i) == used.end()) {
+        Dfs(i, 0, false, graph);
       }
     }
     return bridges;
   }
 };
+
+}  // namespace graph
 
 #endif  // INCLUDE_FIND_BRIDGES_HPP_

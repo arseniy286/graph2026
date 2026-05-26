@@ -5,6 +5,7 @@
 
 #include "methods.hpp"
 #include "../include/find_bridges.hpp"
+#include "../include/graph.hpp"
 
 namespace graph {
 
@@ -14,11 +15,21 @@ int FindBridgesMethod(const nlohmann::json& input, nlohmann::json* output) {
     return -1;
   }
 
-  std::vector<std::vector<int>> graph_data =
-      input["graph"].get<std::vector<std::vector<int>>>();
+  Graph graph_data;
+  std::vector<std::vector<size_t>> json_graph =
+      input["graph"].get<std::vector<std::vector<size_t>>>();
 
-  FindBridgesAlgorithm<std::vector<std::vector<int>>> algorithm;
-  std::vector<std::pair<int, int>> bridges = algorithm.FindBridges(graph_data);
+  for (size_t i = 0; i < json_graph.size(); ++i) {
+    graph_data.AddVertex(i);
+    for (size_t neighbor : json_graph[i]) {
+      graph_data.AddVertex(neighbor);
+      graph_data.AddEdge(i, neighbor);
+    }
+  }
+
+  FindBridgesAlgorithm<Graph> algorithm;
+  std::vector<std::pair<size_t, size_t>> bridges =
+      algorithm.FindBridges(graph_data);
 
   (*output)["bridges"] = bridges;
   return 0;
